@@ -26,7 +26,6 @@ def get_choice():
     return input("Choose an option (1-4): ").strip()
 
 def api_request(api_url):
-    """Fetch all countries from the API. Returns a list of dicts, or None on failure."""
     try:
         response = requests.get(api_url, timeout=10)
         response.raise_for_status()
@@ -41,7 +40,7 @@ def get_regions(countries):
 
 def filter_by_region(countries, region):
     """Filter countries by the specified region. Returns a list of dicts."""
-    return [country for country in countries 
+    return [country for country in countries
             if (country.get("region") or "").lower() == region.lower()]
 
 def find_country_by_name(countries, name):
@@ -98,6 +97,54 @@ def get_country_row(country):
     name_cell = f"{escape(country.get('flag') or '')}  {escape(country.get('name') or 'Unknown')}"
     return [name_cell] + [format_value_by_key(country, key) for key in COUNTRY_KEYS]
 
+def handle_regions_option(countries):
+    console.print("Available regions:")
+    regions = get_regions(countries)
+    for i, region in enumerate(regions, 1): 
+        console.print(f"[bold]{i}[/bold] OR {region}")
+    console.print("-------------------")
+    region = input("Enter a number or region name: ").strip()
+
+    if not region:
+        print_error("Region cannot be empty.")
+        return
+    elif region.isdigit():
+        region_index = int(region) - 1
+        if 0 <= region_index < len(regions):
+            region = regions[region_index]
+
+    countries_in_region = filter_by_region(countries, region)
+    if not countries_in_region:
+        print_error(f"No countries found in region {escape(region)}.")
+    else:
+        show_countries_table(f"Countries in region {escape(region)}", countries_in_region)
+
+def handle_country_option(countries):
+    name = input("Enter a country name: ").strip()
+    if not name:
+        print_error("Country name cannot be empty.")
+        return
+    found_country = find_country_by_name(countries, name)
+
+    if not found_country:
+        print_error(f"Country {escape(name)} not found.")
+    else:
+        show_countries_table(f"Details of {escape(name)}", [found_country])
+    console.print()
+
+def handle_comparison_option(countries):
+    name1 = input("Enter the first country name: ").strip()
+    name2 = input("Enter the second country name: ").strip()
+    if not name1 or not name2:
+        print_error("Both country names must be provided.")
+        return
+    country1, country2 = compare_countries_by_name(countries, name1, name2)
+    if country1 and country2:
+        show_countries_table(f"Comparison of {escape(name1)} and {escape(name2)}", [country1, country2])
+    else:
+        print_error("One or both countries not found.")
+    console.print()
+
 def main():
     countries = api_request(API_URL)
 
@@ -112,49 +159,11 @@ def main():
         choice = get_choice()
 
         if choice == "1":
-            console.print("Available regions:")
-            regions = get_regions(countries)
-            for i, region in enumerate(regions, 1): console.print(f"[bold]{i}[/bold] OR {region}")
-            console.print("-------------------")
-            region = input("Enter a number or region name: ").strip()
-
-            if not region:
-                print_error("Region cannot be empty.")
-                continue
-            elif region.isdigit():
-                region_index = int(region) - 1
-                if 0 <= region_index < len(regions):
-                    region = regions[region_index]
-
-            countries_in_region = filter_by_region(countries, region)
-            if not countries_in_region:
-                print_error(f"No countries found in region {escape(region)}.")
-            else:
-                show_countries_table(f"Countries in region {escape(region)}", countries_in_region)
+            handle_regions_option(countries)
         elif choice == "2":
-            name = input("Enter a country name: ").strip()
-            if not name:
-                print_error("Country name cannot be empty.")
-                continue
-            found_country = find_country_by_name(countries, name)
-
-            if not found_country:
-                print_error(f"Country {escape(name)} not found.")
-            else:
-                show_countries_table(f"Details of {escape(name)}", [found_country])
-            console.print()
+            handle_country_option(countries)
         elif choice == "3":
-            name1 = input("Enter the first country name: ").strip()
-            name2 = input("Enter the second country name: ").strip()
-            if not name1 or not name2:
-                print_error("Both country names must be provided.")
-                continue
-            country1, country2 = compare_countries_by_name(countries, name1, name2)
-            if country1 and country2:
-                show_countries_table(f"Comparison of {escape(name1)} and {escape(name2)}", [country1, country2])
-            else:
-                print_error("One or both countries not found.")
-            console.print()
+            handle_comparison_option(countries)
         elif choice == "4":
             console.print("Goodbye!")
             break
