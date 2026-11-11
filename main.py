@@ -84,7 +84,7 @@ def show_countries_table(title, countries):
         header_style="bold white on dark_blue",
         title_style="bold yellow",
         expand=False,
-    )       
+    )
     table.add_column("Name", style="bold cyan")
     for key in COUNTRY_KEYS:
         table.add_column(key.capitalize(), justify="right" if key in ("population", "area") else "left")
@@ -130,7 +130,6 @@ def main():
             if not countries_in_region:
                 print_error(f"No countries found in region {escape(region)}.")
             else:
-                console.print(f"Countries in region {escape(region)}:")
                 show_countries_table(f"Countries in region {escape(region)}", countries_in_region)
         elif choice == "2":
             name = input("Enter a country name: ").strip()
