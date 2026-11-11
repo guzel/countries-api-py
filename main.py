@@ -25,10 +25,10 @@ def print_error(message):
 def get_choice():
     return input("Choose an option (1-4): ").strip()
 
-def fetch_countries():
+def api_request(api_url):
     """Fetch all countries from the API. Returns a list of dicts, or None on failure."""
     try:
-        response = requests.get(API_URL, timeout=10)
+        response = requests.get(api_url, timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as error:
@@ -99,7 +99,7 @@ def get_country_row(country):
     return [name_cell] + [format_value_by_key(country, key) for key in COUNTRY_KEYS]
 
 def main():
-    countries = fetch_countries()
+    countries = api_request(API_URL)
 
     if not countries:
         print_error("No data available. Exiting.")
