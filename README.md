@@ -79,7 +79,7 @@ Wide tables look best in a terminal that is at least about 110 columns wide.
 | `requirements.txt` | Python dependencies                             |
 | `README.md`        | This file                                       |
 
-Inside `main.py`, fetching (`fetch_countries`), data handling
+Inside `main.py`, fetching (`api_request`), data handling
 (`filter_by_region`, `find_country_by_name`, `format_value_by_key`) and display
 (`show_menu`, `show_countries_table`, `print_error`) live in separate
-functions.
+functions, and each menu option has its own `handle_*_option` function.
